@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #if LIBFTDI1 == 1
 #include <libftdi1/ftdi.h>
@@ -53,11 +54,21 @@ int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 			 * 
 			 * Is this needed anymore? It slows down repetitive read operations by ~8%.
 			 */
-			ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
+			//ftdi_usb_purge_rx_buffer(&mpsse->ftdi);
+			purge_rx_buffer(mpsse);
 		}
 	}
 
 	return n;
+}
+
+/* Read data and discard all buffer from the FTDI chip */
+void purge_rx_buffer(struct mpsse_context *mpsse)
+{
+	unsigned char buf[512];
+	while (ftdi_read_data(&mpsse->ftdi, buf, sizeof(buf)) > 0) {
+		// discard
+	}
 }
 
 /* Sets the read and write timeout periods for bulk usb data transfers. */
